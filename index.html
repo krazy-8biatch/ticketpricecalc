@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TrainCalc — Train Manager 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg-primary: #121212;
+    --bg-secondary: #1b1b1b;
+    --bg-tertiary: #0d0d0d;
+    --bg-danger: #2a1313;
+    --text-primary: #f5f5f5;
+    --text-secondary: #a1a1aa;
+    --text-danger: #f87171;
+    --text-success: #4ade80;
+    --border: rgba(255,255,255,0.12);
+    --border-hover: rgba(255,255,255,0.25);
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --shadow: 0 2px 8px rgba(0,0,0,0.45);
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  /* NAV */
+  nav {
+    background: var(--bg-primary);
+    border-bottom: 0.5px solid var(--border);
+    padding: 0 1.5rem;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .nav-logo {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+  }
+  .nav-logo i { font-size: 18px; color: var(--text-secondary); }
+  .nav-badge {
+    font-size: 11px;
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    border: 0.5px solid var(--border);
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 500;
+  }
+
+  /* LAYOUT */
+  main {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 2rem 1.25rem 4rem;
+  }
+
+  .page-header {
+    margin-bottom: 2rem;
+  }
+  .page-header h1 {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+  }
+  .page-header p {
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+
+  /* CARDS */
+  .card {
+    background: var(--bg-primary);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow);
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 1.25rem;
+  }
+  .card-header i { font-size: 20px; color: var(--text-secondary); }
+  .card-header h2 { font-size: 15px; font-weight: 500; color: var(--text-primary); }
+  .card-header p { font-size: 12px; color: var(--text-secondary); margin-top: 1px; }
+
+  /* INPUTS */
+  .input-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 1.25rem;
+  }
+  @media (max-width: 480px) {
+    .input-grid { grid-template-columns: 1fr; }
+  }
+
+  label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    display: block;
+    margin-bottom: 6px;
+  }
+
+  input[type="number"] {
+    width: 100%;
+    padding: 9px 12px;
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--text-primary);
+    background: var(--bg-secondary);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-md);
+    outline: none;
+    transition: border-color 0.15s;
+    -moz-appearance: textfield;
+  }
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
+  input[type="number"]:focus { border-color: var(--border-hover); background: var(--bg-primary); }
+
+  /* RESULTS GRID */
+  .results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 10px;
+  }
+
+  .result-card {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    padding: 14px;
+  }
+  .result-card.danger {
+    background: var(--bg-danger);
+  }
+
+  .result-label {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .result-card.danger .result-label { color: var(--text-danger); }
+  .result-label i { font-size: 13px; }
+
+  .result-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+  }
+
+  .result-value {
+    font-size: 26px;
+    font-weight: 500;
+    color: var(--text-primary);
+    line-height: 1;
+  }
+  .result-card.danger .result-value { color: var(--text-danger); }
+
+  .copy-btn {
+    background: var(--bg-primary);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-md);
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    font-size: 14px;
+    flex-shrink: 0;
+    transition: background 0.1s, color 0.1s;
+  }
+  .copy-btn:hover { background: var(--bg-tertiary); }
+  .copy-btn.copied { color: var(--text-success); }
+
+  /* FREIGHT RESULT */
+  .freight-result {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .freight-result .result-label { margin-bottom: 4px; }
+  .freight-result .result-value { font-size: 30px; }
+
+  /* DIVIDER */
+  .divider {
+    border: none;
+    border-top: 0.5px solid var(--border);
+    margin: 1.25rem 0;
+  }
+
+  /* FORMULA FOOTER */
+  .formula-box {
+    background: var(--bg-secondary);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem 1.5rem;
+    margin-top: 1rem;
+  }
+  .formula-box h3 {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 10px;
+  }
+  .formula-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 5px 0;
+    border-bottom: 0.5px solid var(--border);
+    gap: 12px;
+  }
+  .formula-row:last-child { border-bottom: none; }
+  .formula-name { font-size: 12px; color: var(--text-secondary); }
+  .formula-expr { font-size: 11px; color: var(--text-secondary); font-family: 'Courier New', monospace; text-align: right; }
+
+  footer {
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-secondary);
+    padding: 2rem 0 1rem;
+    border-top: 0.5px solid var(--border);
+    margin-top: 2rem;
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="#">
+    <i class="ti ti-train"></i>
+    TrainCalc
+  </a>
+  <span class="nav-badge">Train Manager 2026</span>
+</nav>
+
+<main>
+  <div class="page-header">
+    <h1>Ticket Price Calculator</h1>
+    <p>Enter the auto-set prices from the game to calculate all fares instantly</p>
+  </div>
+
+  <!-- PASSENGER CARD -->
+  <div class="card">
+    <div class="card-header">
+      <i class="ti ti-users"></i>
+      <div>
+        <h2>Passenger train</h2>
+        <p>No reservation & reservation fares</p>
+      </div>
+    </div>
+
+    <div class="input-grid">
+      <div>
+        <label>Auto-set price — no reservation</label>
+        <input type="number" id="p-nores-auto" placeholder="e.g. 146" min="0" step="0.01" oninput="calcP()" />
+      </div>
+      <div>
+        <label>Auto-set price — reservation</label>
+        <input type="number" id="p-res-auto" placeholder="e.g. 242" min="0" step="0.01" oninput="calcP()" />
+      </div>
+    </div>
+
+    <div class="results-grid">
+      <div class="result-card">
+        <div class="result-label"><i class="ti ti-armchair"></i> No reservation</div>
+        <div class="result-row">
+          <span class="result-value" id="p-nores">—</span>
+          <button class="copy-btn" onclick="copyVal('p-nores', this)" title="Copy"><i class="ti ti-copy"></i></button>
+        </div>
+      </div>
+      <div class="result-card">
+        <div class="result-label"><i class="ti ti-bookmark"></i> Reservation</div>
+        <div class="result-row">
+          <span class="result-value" id="p-res">—</span>
+          <button class="copy-btn" onclick="copyVal('p-res', this)" title="Copy"><i class="ti ti-copy"></i></button>
+        </div>
+      </div>
+      <div class="result-card danger">
+        <div class="result-label"><i class="ti ti-ban"></i> Fare dodger fine</div>
+        <div class="result-row">
+          <span class="result-value" id="p-fine">—</span>
+          <button class="copy-btn" onclick="copyVal('p-fine', this)" title="Copy"><i class="ti ti-copy"></i></button>
+        </div>
+      </div>
+      <div class="result-card">
+        <div class="result-label"><i class="ti ti-shield-check"></i> Inspectors</div>
+        <div class="result-row">
+          <span class="result-value">10</span>
+          <button class="copy-btn" onclick="copyText('10', this)" title="Copy"><i class="ti ti-copy"></i></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FREIGHT CARD -->
+  <div class="card">
+    <div class="card-header">
+      <i class="ti ti-container"></i>
+      <div>
+        <h2>Freight train</h2>
+        <p>Price per tonne</p>
+      </div>
+    </div>
+
+    <div style="margin-bottom: 1.25rem;">
+      <label>Auto-set price</label>
+      <input type="number" id="f-auto" placeholder="e.g. 150" min="0" step="0.01" oninput="calcF()" />
+    </div>
+
+    <div class="freight-result">
+      <div>
+        <div class="result-label"><i class="ti ti-package"></i> Freight price / tonne</div>
+        <span class="result-value" id="f-price">—</span>
+      </div>
+      <button class="copy-btn" onclick="copyVal('f-price', this)" title="Copy"><i class="ti ti-copy"></i></button>
+    </div>
+  </div>
+
+  <footer>
+    TrainCalc · Built for Train Manager 2026
+  </footer>
+</main>
+
+<script>
+  function calcP() {
+    const noresAuto = parseFloat(document.getElementById('p-nores-auto').value);
+    const resAuto = parseFloat(document.getElementById('p-res-auto').value);
+
+    if (!isNaN(noresAuto) && noresAuto >= 0) {
+      document.getElementById('p-nores').textContent = Math.round((noresAuto * 1.15) - 1.5);
+      document.getElementById('p-fine').textContent = Math.round((noresAuto * 5) - 5);
+    } else {
+      document.getElementById('p-nores').textContent = '—';
+      document.getElementById('p-fine').textContent = '—';
+    }
+
+    if (!isNaN(resAuto) && resAuto >= 0) {
+      document.getElementById('p-res').textContent = Math.round((resAuto * 1.1) - 1.5);
+    } else {
+      document.getElementById('p-res').textContent = '—';
+    }
+  }
+
+  function calcF() {
+    const a = parseFloat(document.getElementById('f-auto').value);
+    document.getElementById('f-price').textContent = (!isNaN(a) && a >= 0) ? Math.round(a * 1.09) : '—';
+  }
+
+  function copyVal(id, btn) {
+    const val = document.getElementById(id).textContent;
+    if (val === '—') return;
+    copyText(val, btn);
+  }
+
+  function copyText(text, btn) {
+    navigator.clipboard.writeText(text).then(() => {
+      btn.innerHTML = '<i class="ti ti-check"></i>';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.innerHTML = '<i class="ti ti-copy"></i>';
+        btn.classList.remove('copied');
+      }, 1200);
+    });
+  }
+</script>
+</body>
+</html>
